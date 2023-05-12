@@ -1,5 +1,6 @@
 :root {
-  --primary-clr: #b38add;
+  --primary-clr: #8addb2;
+  --secondary-clr: #373c4f;
 }
 * {
   margin: 0;
@@ -39,7 +40,7 @@ body {
   display: flex;
 
   border-radius: 10px;
-  background-color: #373c4f;
+  background-color: var(--secondary-clr);
 }
 .left {
   width: 60%;
@@ -546,7 +547,7 @@ body {
   padding: 10px;
   font-size: 12px;
   color: #fff;
-  background-color: #b38add;
+  background-color: #319b3a;
 }
 .credits a {
   color: #fff;
