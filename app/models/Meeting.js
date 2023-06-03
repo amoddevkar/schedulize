@@ -1,30 +1,29 @@
 const mongoose = require('mongoose');
 
 const meetingSchema = new mongoose.Schema({
-    title: {
-        type: String,
-        required: true
-    },
-    date: {
-        type: Date,
-        required: true
-    },
-    duration: {
+    day: {
         type: Number,
         required: true
     },
-    attendees: {
-        type: [String],
+    month: {
+        type: Number,
         required: true
     },
-    location: {
-        type: String,
+    year: {
+        type: Number,
         required: true
     },
-    agenda: {
-        type: String,
-        required: true
-    }
+    events: [{
+        title: {
+            type: String,
+            required: true
+        },
+        time: {
+            type: String,
+            required: true
+        },
+    }]
+
 });
 
 const Meeting = mongoose.model('Meeting', meetingSchema);

@@ -54,9 +54,21 @@ const months = [
 //     ],
 //   },
 // ];
+async function getUser() {
+    try {
+        const res = await fetch("http://localhost:5000/getuser");
+        const user = await res.json()
+        if (user.role == "user") {
+            addEventBtn.style.visibility = "hidden"
+        }
+    } catch (error) {
+        console.log(error);
+    }
+}
 
 const eventsArr = [];
 getEvents();
+getUser();
 console.log(eventsArr);
 
 //function to add days in days with class day and prev-date next-date on previous month and next month days and active on today
@@ -72,6 +84,7 @@ function initCalendar() {
     date.innerHTML = months[month] + " " + year;
 
     let days = "";
+
 
     for (let x = day; x > 0; x--) {
         days += `<div class="day prev-date">${prevDays - x + 1}</div>`;
@@ -360,42 +373,62 @@ addEventSubmit.addEventListener("click", () => {
         title: eventTitle,
         time: timeFrom + " - " + timeTo,
     };
-    console.log(newEvent);
-    console.log(activeDay);
-    let eventAdded = false;
-    if (eventsArr.length > 0) {
-        eventsArr.forEach((item) => {
-            if (
-                item.day === activeDay &&
-                item.month === month + 1 &&
-                item.year === year
-            ) {
-                item.events.push(newEvent);
-                eventAdded = true;
-            }
-        });
+    const bodydata = {
+        day: activeDay,
+        month: month + 1,
+        year: year,
+        event: newEvent
     }
+    const options = {
+        method: 'POST',
+        body: JSON.stringify(bodydata),
+        headers: { 'Content-Type': 'application/json' }
+    }
+    const url = 'http://localhost:5000/addmeeting'
+    fetch(url, options).then(() => {
+        console.log(newEvent);
+        console.log(activeDay);
+        let eventAdded = false;
+        if (eventsArr.length > 0) {
+            eventsArr.forEach((item) => {
+                if (
+                    item.day === activeDay &&
+                    item.month === month + 1 &&
+                    item.year === year
+                ) {
+                    item.events.push(newEvent);
+                    eventAdded = true;
+                }
+            });
+        }
 
-    if (!eventAdded) {
-        eventsArr.push({
-            day: activeDay,
-            month: month + 1,
-            year: year,
-            events: [newEvent],
-        });
-    }
+        if (!eventAdded) {
+            eventsArr.push({
+                day: activeDay,
+                month: month + 1,
+                year: year,
+                events: [newEvent],
+            });
+        }
 
-    console.log(eventsArr);
-    addEventWrapper.classList.remove("active");
-    addEventTitle.value = "";
-    addEventFrom.value = "";
-    addEventTo.value = "";
-    updateEvents(activeDay);
-    //select active day and add event class if not added
-    const activeDayEl = document.querySelector(".day.active");
-    if (!activeDayEl.classList.contains("event")) {
-        activeDayEl.classList.add("event");
-    }
+        console.log(eventsArr);
+        addEventWrapper.classList.remove("active");
+        addEventTitle.value = "";
+        addEventFrom.value = "";
+        addEventTo.value = "";
+        updateEvents(activeDay);
+
+
+
+        //select active day and add event class if not added
+        const activeDayEl = document.querySelector(".day.active");
+        if (!activeDayEl.classList.contains("event")) {
+            activeDayEl.classList.add("event");
+        }
+    }).catch((error) => {
+        console.log(error);
+    })
+
 });
 
 //function to delete event when clicked on event
