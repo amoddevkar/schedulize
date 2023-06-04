@@ -5,6 +5,7 @@ const path = require("path")
 const app = express()
 const User = require("./models/User")
 const Meeting = require("./models/Meeting")
+const emailHelper = require("./emailHelper")
 const mongoose = require('mongoose');
 
 mongoose
@@ -85,12 +86,29 @@ app.post('/signin', (req, res) => {
 
 app.post('/addmeeting', isAuthenticated, (req, res) => {
     const { day, month, year, event } = req.body;
+
+
+
     Meeting.findOne({ day, month, year }).then((meeting) => {
         console.log(meeting, req.session.user);
         if (meeting) {
             meeting.events.push(event);
             meeting.save();
-            res.redirect('/');
+            User.find().then((users) => {
+
+                let emails = "";
+                for (let i = 0; i < users.length - 1; i++) {
+                    emails = emails + users[i].email + ",";
+                }
+                emails = emails + users[users.length - 1].email
+                console.log(emails);
+
+                emailHelper({ email: emails, subject: "Schedulize - New Meeting Added", text: `new meeting with title ${event.title} scheduled at ${event.time}` })
+                res.redirect('/')
+            }).catch((error) => {
+                console.log(error);
+            })
+
         } else {
             throw "not found"
         }
@@ -102,7 +120,25 @@ app.post('/addmeeting', isAuthenticated, (req, res) => {
         }]
         const meeting = new Meeting({ day, month, year, events });
         meeting.save().then(() => {
-            res.redirect('/');
+            User.find().then((users) => {
+
+                let emails = "";
+                for (let i = 0; i < users.length - 1; i++) {
+                    emails = emails + users[i].email + ",";
+                }
+                emails = emails + users[users.length - 1].email
+                console.log(emails);
+                const mail = {
+                    email: emails,
+                    subject: "Schedulize - New Meeting Added",
+                    message: `New meeting with title ${event.title} is scheduled during ${event.time}`
+                }
+                emailHelper(mail)
+                res.redirect('/')
+            }).catch((error) => {
+                console.log(error);
+            })
+
         }).catch((error) => {
             console.log(error);
         })
